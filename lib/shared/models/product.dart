@@ -1,20 +1,37 @@
 import 'package:hive/hive.dart';
-import '../../shared/models/product.dart';
 
-class ProductRepository {
-  final Box<Product> _box = Hive.box<Product>('products');
+part 'product.g.dart';
 
-  List<Product> getAll() => _box.values.toList();
+@HiveType(typeId: 0)
+class Product {
+  @HiveField(0)
+  final String id;
 
-  Future<void> add(Product product) async {
-    await _box.put(product.id, product);
-  }
+  @HiveField(1)
+  final String name;
 
-  Future<void> update(Product product) async {
-    await _box.put(product.id, product);
-  }
+  @HiveField(2)
+  final String sku;
 
-  Future<void> delete(String id) async {
-    await _box.delete(id);
-  }
+  @HiveField(3)
+  final double price;
+
+  @HiveField(4)
+  final int stockQty;
+
+  @HiveField(5)
+  final String category;
+
+  @HiveField(6)
+  final DateTime? expiryDate;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.sku,
+    required this.price,
+    required this.stockQty,
+    required this.category,
+    this.expiryDate,
+  });
 }
