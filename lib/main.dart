@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:supermarket_erp_demo/features/inventory/inventory_screen.dart';
 
 import 'shared/models/product.dart';
 
@@ -23,9 +24,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Supermarket ERP Demo',
       theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(
-        body: Center(child: Text('ERP Bootstrapped ✅')),
-      ),
+     home: const InventoryScreen(),
+
     );
   }
 }
