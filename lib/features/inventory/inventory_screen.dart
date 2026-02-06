@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../shared/models/product.dart';
+import '../pos/pos_provider.dart';
 import 'product_provider.dart';
-import 'widgets/add_product_dialog.dart';
 
 class InventoryScreen extends ConsumerWidget {
   const InventoryScreen({super.key});
@@ -16,70 +15,42 @@ class InventoryScreen extends ConsumerWidget {
         title: const Text('Inventory'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.point_of_sale),
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => const AddProductDialog(),
-              );
+              Navigator.pushNamed(context, '/pos');
             },
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: products.isEmpty
-            ? const Center(child: Text('No products yet'))
-            : SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Name')),
-                    DataColumn(label: Text('SKU')),
-                    DataColumn(label: Text('Category')),
-                    DataColumn(label: Text('Price')),
-                    DataColumn(label: Text('Stock')),
-                    DataColumn(label: Text('Actions')),
-                  ],
-                  rows: products.map((product) {
-                    final lowStock = product.stockQty < 5;
+      body: ListView.builder(
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
 
-                    return DataRow(
-                      color: lowStock
-                          ? MaterialStateProperty.all(
-                              Colors.red.withOpacity(0.1),
-                            )
-                          : null,
-                      cells: [
-                        DataCell(Text(product.name)),
-                        DataCell(Text(product.sku)),
-                        DataCell(Text(product.category)),
-                        DataCell(Text(product.price.toStringAsFixed(2))),
-                        DataCell(
-                          Text(
-                            product.stockQty.toString(),
-                            style: TextStyle(
-                              color: lowStock ? Colors.red : null,
-                              fontWeight:
-                                  lowStock ? FontWeight.bold : FontWeight.normal,
-                            ),
-                          ),
+          return ListTile(
+            title: Text(product.name),
+            subtitle: Text(
+              'Stock: ${product.stockQty} | \$${product.price}',
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.add_shopping_cart),
+              onPressed: product.stockQty <= 0
+                  ? null
+                  : () {
+                      ref
+                          .read(posProvider.notifier)
+                          .addToCart(product);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Added to cart'),
+                          duration: Duration(milliseconds: 800),
                         ),
-                        DataCell(
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              ref
-                                  .read(productsProvider.notifier)
-                                  .deleteProduct(product.id);
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
+                      );
+                    },
+            ),
+          );
+        },
       ),
     );
   }

@@ -24,4 +24,21 @@ class ProductNotifier extends StateNotifier<List<Product>> {
     await repository.delete(id);
     state = repository.getAll();
   }
+
+  void updateStock(String id, int i) {
+    final index = state.indexWhere((p) => p.id == id);
+    if (index >= 0) {
+      final product = state[index];
+      final updatedProduct = Product(
+        id: product.id,
+        name: product.name,
+        sku: product.sku,
+        category: product.category,
+        price: product.price,
+        stockQty: i,
+      );
+      repository.update(updatedProduct);
+      state = repository.getAll();
+    }
+  }
 }

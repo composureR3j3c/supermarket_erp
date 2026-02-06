@@ -15,4 +15,7 @@ class ProductRepository {
   Future<void> delete(String id) async {
     await _box.delete(id);
   }
+   Future<void> update(Product product) async {
+    await _box.put(product.id, product);
+  }
 }
