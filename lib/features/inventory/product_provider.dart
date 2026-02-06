@@ -15,6 +15,7 @@ class ProductNotifier extends StateNotifier<List<Product>> {
 
   ProductNotifier(this.repository) : super(repository.getAll());
 
+
   Future<void> addProduct(Product product) async {
     await repository.add(product);
     state = repository.getAll();
@@ -41,4 +42,5 @@ class ProductNotifier extends StateNotifier<List<Product>> {
       state = repository.getAll();
     }
   }
+  
 }
