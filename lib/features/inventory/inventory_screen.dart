@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/models/product.dart';
 import 'product_provider.dart';
+import '../pos/pos_provider.dart';
 
 class InventoryScreen extends ConsumerWidget {
   const InventoryScreen({super.key});
@@ -9,12 +10,18 @@ class InventoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(productsProvider);
-    final width = MediaQuery.of(context).size.width;
-    final isWide = width >= 720;
+    final isWide = MediaQuery.of(context).size.width > 700;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inventory'),
+        actions: [
+          IconButton(
+            tooltip: 'Go to POS',
+            icon: const Icon(Icons.point_of_sale),
+            onPressed: () => Navigator.pushNamed(context, '/pos'),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(Icons.add),
@@ -31,39 +38,39 @@ class InventoryScreen extends ConsumerWidget {
                 ),
               );
         },
+
+
       ),
-      body: products.isEmpty
-          ? const Center(child: Text('No products'))
-          : Padding(
-              padding: const EdgeInsets.all(12),
-              child: isWide
-                  ? GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        childAspectRatio: 1.9,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
-                      itemCount: products.length,
-                      itemBuilder: (_, i) =>
-                          _ProductCard(products[i], ref),
-                    )
-                  : ListView.builder(
-                      itemCount: products.length,
-                      itemBuilder: (_, i) =>
-                          _ProductCard(products[i], ref),
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        child: products.isEmpty
+            ? const Center(child: Text('No products'))
+            : isWide
+                ? GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 1.8,
                     ),
-            ),
+                    itemCount: products.length,
+                    itemBuilder: (_, i) =>
+                        _InventoryCard(products[i], ref),
+                  )
+                : ListView.builder(
+                    itemCount: products.length,
+                    itemBuilder: (_, i) =>
+                        _InventoryCard(products[i], ref),
+                  ),
+      ),
     );
   }
 }
 
-class _ProductCard extends StatelessWidget {
-  final Product product;
+class _InventoryCard extends StatelessWidget {
+  final product;
   final WidgetRef ref;
 
-  const _ProductCard(this.product, this.ref);
+  const _InventoryCard(this.product, this.ref);
 
   @override
   Widget build(BuildContext context) {
@@ -81,40 +88,25 @@ class _ProductCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-            Text('SKU: ${product.sku}'),
-            Text('Category: ${product.category}'),
-            const SizedBox(height: 4),
             Text('Stock: ${product.stockQty}'),
-            Text('Price: \$${product.price}'),
+            Text('Price: ${product.price}'),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  tooltip: 'Decrease stock',
-                  icon: const Icon(Icons.remove),
+                  tooltip: 'Add to cart',
+                  icon: const Icon(Icons.add_shopping_cart),
                   onPressed: product.stockQty <= 0
                       ? null
                       : () {
                           ref
-                              .read(productsProvider.notifier)
-                              .updateStock(
-                                product.id,
-                                product.stockQty - 1,
-                              );
+                              .read(posProvider.notifier)
+                              .addToCart(product);
+
+                          // Redirect immediately to POS
+                          Navigator.pushNamed(context, '/pos');
                         },
-                ),
-                IconButton(
-                  tooltip: 'Increase stock',
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    ref
-                        .read(productsProvider.notifier)
-                        .updateStock(
-                          product.id,
-                          product.stockQty + 1,
-                        );
-                  },
                 ),
                 IconButton(
                   tooltip: 'Delete',
