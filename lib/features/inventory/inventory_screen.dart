@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/models/product.dart';
 import 'product_provider.dart';
 import '../pos/pos_provider.dart';
+import 'widgets/add_product_dialog.dart';
 
 class InventoryScreen extends ConsumerWidget {
   const InventoryScreen({super.key});
@@ -23,22 +24,20 @@ class InventoryScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add),
-        label: const Text('Add'),
-        onPressed: () {
-          ref.read(productsProvider.notifier).addProduct(
-                Product(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  name: 'Product ${products.length + 1}',
-                  sku: 'SKU-${products.length + 1}',
-                  category: 'General',
-                  price: 10,
-                  stockQty: 5,
-                ),
-              );
-        },
-      ),
+     floatingActionButton: FloatingActionButton.extended(
+  icon: const Icon(Icons.add),
+  label: const Text('Add'),
+  onPressed: () async {
+    final result = await showDialog(
+      context: context,
+      builder: (_) => const AddProductDialog(),
+    );
+
+    if (result != null) {
+      ref.read(productsProvider.notifier).addProduct(result);
+    }
+  },
+),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: products.isEmpty
