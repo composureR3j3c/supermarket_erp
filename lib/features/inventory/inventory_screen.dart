@@ -38,8 +38,6 @@ class InventoryScreen extends ConsumerWidget {
                 ),
               );
         },
-
-
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),

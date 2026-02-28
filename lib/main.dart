@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Supermarket ERP Demo',
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(useMaterial3: true, fontFamily: 'Roboto'),
       //  home: const InventoryScreen(),
       routes: {
         '/': (_) => const InventoryScreen(),
