@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:supermarket_erp_demo/features/inventory/widgets/inventory_card.dart';
 
 class QuantityDialog extends StatefulWidget {
   final int maxStock;
 
-  const QuantityDialog({required this.maxStock});
+  const QuantityDialog({super.key, required this.maxStock});
 
   @override
   State<QuantityDialog> createState() => QuantityDialogState();
 }
+
 class QuantityDialogState extends State<QuantityDialog> {
   int quantity = 1;
 
@@ -63,5 +63,3 @@ class QuantityDialogState extends State<QuantityDialog> {
     );
   }
 }
-
-

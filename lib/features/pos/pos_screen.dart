@@ -1,12 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supermarket_erp_demo/features/inventory/widgets/quantity_dialog.dart';
 import '../inventory/product_provider.dart';
+import '../../shared/models/product.dart';
 import 'pos_provider.dart';
 import 'widgets/cart_item_widget.dart';
 import 'widgets/product_card.dart';
+import 'widgets/upc_scan_dialog.dart';
 
 class POSScreen extends ConsumerWidget {
   const POSScreen({super.key});
+
+  Future<void> _scanUpcAndAdd(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> products,
+  ) async {
+    final product = await showDialog<Product>(
+      context: context,
+      builder: (_) => UpcScanDialog(products: products),
+    );
+
+    if (!context.mounted) return;
+    if (product == null) return;
+
+    if (product.stockQty <= 0) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${product.name} is out of stock')),
+        );
+      }
+      return;
+    }
+
+    final qty = await showDialog<int>(
+      context: context,
+      builder: (_) => QuantityDialog(maxStock: product.stockQty),
+    );
+
+    if (qty == null || qty <= 0) return;
+
+    ref.read(posProvider.notifier).addToCart(product, quantity: qty);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added ${product.name} x$qty to cart')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,7 +55,17 @@ class POSScreen extends ConsumerWidget {
     final cart = ref.watch(posProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Point of Sale'), centerTitle: false),
+      appBar: AppBar(
+        title: const Text('Point of Sale'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            tooltip: 'Scan UPC',
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () => _scanUpcAndAdd(context, ref, products),
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
