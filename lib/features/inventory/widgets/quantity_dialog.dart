@@ -14,7 +14,11 @@ class QuantityDialogState extends State<QuantityDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isCompact = size.width < 480;
+
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       title: const Text('Select Quantity'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -26,13 +30,18 @@ class QuantityDialogState extends State<QuantityDialog> {
             children: [
               IconButton(
                 icon: const Icon(Icons.remove),
+                visualDensity: VisualDensity.compact,
                 onPressed: quantity > 1
                     ? () => setState(() => quantity--)
                     : null,
               ),
-              Text(quantity.toString(), style: const TextStyle(fontSize: 20)),
+              Text(
+                quantity.toString(),
+                style: TextStyle(fontSize: isCompact ? 18 : 20),
+              ),
               IconButton(
                 icon: const Icon(Icons.add),
+                visualDensity: VisualDensity.compact,
                 onPressed: quantity < widget.maxStock
                     ? () => setState(() => quantity++)
                     : null,

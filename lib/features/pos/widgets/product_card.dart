@@ -10,12 +10,13 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outOfStock = product.stockQty <= 0;
+    final compact = MediaQuery.of(context).size.width < 480;
 
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(compact ? 8 : 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -23,22 +24,25 @@ class ProductCard extends StatelessWidget {
               product.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: compact ? 13 : 14,
+              ),
             ),
             const Spacer(),
             Text(
               '\$${product.price.toStringAsFixed(2)}',
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: compact ? 14 : 16),
             ),
             const SizedBox(height: 4),
             Text(
               'Stock: ${product.stockQty}',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: compact ? 11 : 12,
                 color: outOfStock ? Colors.red : Colors.grey,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: compact ? 6 : 8),
             SizedBox(
               width: double.infinity,
               child: AddItem(
@@ -86,6 +90,8 @@ class _AddItemState extends State<AddItem> {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.of(context).size.width < 480;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -96,25 +102,29 @@ class _AddItemState extends State<AddItem> {
               IconButton(
                 onPressed: decrement,
                 icon: const Icon(Icons.remove),
+                iconSize: compact ? 18 : 20,
+                visualDensity: VisualDensity.compact,
                 constraints: const BoxConstraints(),
                 padding: EdgeInsets.zero,
               ),
               Text(
                 quantity.toString(),
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: compact ? 14 : 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               IconButton(
                 onPressed: increment,
                 icon: const Icon(Icons.add),
+                iconSize: compact ? 18 : 20,
+                visualDensity: VisualDensity.compact,
                 constraints: const BoxConstraints(),
                 padding: EdgeInsets.zero,
               ),
             ],
           ),
-        const SizedBox(height: 6),
+        SizedBox(height: compact ? 4 : 6),
         ElevatedButton.icon(
           onPressed: widget.outOfStock
               ? null

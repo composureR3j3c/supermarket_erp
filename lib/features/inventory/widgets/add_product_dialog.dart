@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supermarket_erp_demo/utils/generate_sku.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../shared/models/product.dart';
@@ -15,36 +16,44 @@ class AddProductDialog extends ConsumerStatefulWidget {
 class _AddProductDialogState extends ConsumerState<AddProductDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _skuCtrl = TextEditingController();
+  final _skuCtrl = TextEditingController(text: generateSku());
   final _categoryCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
   final _stockCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final dialogWidth = size.width < 600 ? size.width * 0.92 : 400.0;
+
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       title: const Text('Add Product'),
       content: SizedBox(
-        width: 400,
+        width: dialogWidth,
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
                   controller: _nameCtrl,
                   decoration: const InputDecoration(labelText: 'Product Name'),
                   validator: (v) => v!.isEmpty ? 'Required' : null,
                 ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _skuCtrl,
                   decoration: const InputDecoration(labelText: 'SKU'),
                   validator: (v) => v!.isEmpty ? 'Required' : null,
                 ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _categoryCtrl,
                   decoration: const InputDecoration(labelText: 'Category'),
                 ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _priceCtrl,
                   decoration: const InputDecoration(labelText: 'Price'),
@@ -52,6 +61,7 @@ class _AddProductDialogState extends ConsumerState<AddProductDialog> {
                   validator: (v) =>
                       double.tryParse(v ?? '') == null ? 'Invalid price' : null,
                 ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _stockCtrl,
                   decoration: const InputDecoration(labelText: 'Stock Qty'),

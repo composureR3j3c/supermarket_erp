@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supermarket_erp_demo/features/inventory/product_provider.dart';
-import 'package:supermarket_erp_demo/features/inventory/widgets/addto_cart_btn.dart';  
+import 'package:supermarket_erp_demo/features/inventory/widgets/addto_cart_btn.dart';
+
 class InventoryCard extends StatelessWidget {
   final product;
   final WidgetRef ref;
 
-  const InventoryCard(this.product, this.ref);
+  const InventoryCard(this.product, this.ref, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               product.name,
@@ -25,8 +27,8 @@ class InventoryCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text('Stock: ${product.stockQty}'),
-            Text('Price: ${product.price}'),
-            const Spacer(),
+            Text('Price: \$${product.price.toStringAsFixed(2)}'),
+            const SizedBox(height: 6),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -34,6 +36,7 @@ class InventoryCard extends StatelessWidget {
                 IconButton(
                   tooltip: 'Delete',
                   icon: const Icon(Icons.delete, color: Colors.red),
+                  visualDensity: VisualDensity.compact,
                   onPressed: () {
                     ref
                         .read(productsProvider.notifier)

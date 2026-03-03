@@ -18,6 +18,7 @@ class AddtoCartBtn extends StatelessWidget {
     return IconButton(
       tooltip: 'Add to cart',
       icon: const Icon(Icons.add_shopping_cart),
+      visualDensity: VisualDensity.compact,
       onPressed: product.stockQty <= 0
           ? null
           : () async {

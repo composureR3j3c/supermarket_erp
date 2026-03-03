@@ -10,7 +10,14 @@ class InventoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(productsProvider);
-    final isWide = MediaQuery.of(context).size.width > 700;
+    final width = MediaQuery.of(context).size.width;
+    final gridCount = width >= 1100
+        ? 4
+        : width >= 800
+        ? 3
+        : width >= 520
+        ? 2
+        : 1;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,19 +46,16 @@ class InventoryScreen extends ConsumerWidget {
         },
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(width < 480 ? 8 : 12),
         child: products.isEmpty
             ? const Center(child: Text('No products'))
-            : isWide
-            ? GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.8,
+            : GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: gridCount,
+                  crossAxisSpacing: width < 480 ? 8 : 10,
+                  mainAxisSpacing: width < 480 ? 8 : 10,
+                  childAspectRatio: width < 480 ? 1.45 : 1.65,
                 ),
-                itemCount: products.length,
-                itemBuilder: (_, i) => InventoryCard(products[i], ref),
-              )
-            : ListView.builder(
                 itemCount: products.length,
                 itemBuilder: (_, i) => InventoryCard(products[i], ref),
               ),
