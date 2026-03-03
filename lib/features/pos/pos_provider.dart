@@ -14,15 +14,19 @@ class POSNotifier extends StateNotifier<List<CartItem>> {
 
   POSNotifier(this.productNotifier) : super([]);
 
-  void addToCart(Product product) {
-    final index = state.indexWhere((c) => c.product.id == product.id);
-    if (index >= 0) {
-      state[index].quantity += 1;
-      state = [...state];
-    } else {
-      state = [...state, CartItem(product: product)];
-    }
+void addToCart(Product product, {int quantity = 1}) {
+  final index = state.indexWhere((c) => c.product.id == product.id);
+
+  if (index >= 0) {
+    state[index].quantity += quantity;
+    state = [...state];
+  } else {
+    state = [
+      ...state,
+      CartItem(product: product, quantity: quantity),
+    ];
   }
+}
 
   void removeFromCart(String productId) {
     state = state.where((c) => c.product.id != productId).toList();

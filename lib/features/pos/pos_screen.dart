@@ -41,8 +41,8 @@ class POSScreen extends ConsumerWidget {
                       final product = products[index];
                       return ProductCard(
                         product: product,
-                        onAdd: () {
-                          ref.read(posProvider.notifier).addToCart(product);
+                        onAdd: (qty) {
+                          ref.read(posProvider.notifier).addToCart(product,quantity: qty);
                         },
                       );
                     },

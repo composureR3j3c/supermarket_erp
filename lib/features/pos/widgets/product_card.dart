@@ -3,13 +3,9 @@ import 'package:supermarket_erp_demo/shared/models/product.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-  final VoidCallback? onAdd;
+  final void Function(int quantity)? onAdd;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-    required this.onAdd,
-  });
+  const ProductCard({super.key, required this.product, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -45,15 +41,88 @@ class ProductCard extends StatelessWidget {
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: outOfStock ? null : onAdd,
-                icon: const Icon(Icons.add),
-                label: const Text('Add'),
+              child: AddItem(
+                outOfStock: product.stockQty == 0,
+                maxQty: product.stockQty,
+                onAdd: onAdd,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class AddItem extends StatefulWidget {
+  const AddItem({
+    super.key,
+    required this.outOfStock,
+    required this.onAdd,
+    this.maxQty,
+  });
+
+  final bool outOfStock;
+  final void Function(int quantity)? onAdd;
+  final int? maxQty;
+
+  @override
+  State<AddItem> createState() => _AddItemState();
+}
+
+class _AddItemState extends State<AddItem> {
+  int quantity = 1;
+
+  void increment() {
+    if (widget.maxQty != null && quantity >= widget.maxQty!) return;
+    setState(() => quantity++);
+  }
+
+  void decrement() {
+    if (quantity > 1) {
+      setState(() => quantity--);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (!widget.outOfStock)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: decrement,
+                icon: const Icon(Icons.remove),
+                constraints: const BoxConstraints(),
+                padding: EdgeInsets.zero,
+              ),
+              Text(
+                quantity.toString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                onPressed: increment,
+                icon: const Icon(Icons.add),
+                constraints: const BoxConstraints(),
+                padding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+        const SizedBox(height: 6),
+        ElevatedButton.icon(
+          onPressed: widget.outOfStock
+              ? null
+              : () => widget.onAdd?.call(quantity),
+          icon: const Icon(Icons.shopping_cart),
+          label: Text(widget.outOfStock ? 'Out of Stock' : 'Add'),
+        ),
+      ],
     );
   }
 }
