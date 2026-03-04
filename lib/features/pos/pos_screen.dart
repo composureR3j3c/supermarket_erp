@@ -4,7 +4,8 @@ import 'package:supermarket_erp_demo/features/inventory/widgets/quantity_dialog.
 import '../inventory/product_provider.dart';
 import '../../shared/models/product.dart';
 import 'pos_provider.dart';
-import 'widgets/card_payment_dialog.dart';
+import 'services/card_reader_service.dart';
+import 'widgets/card_reader_payment_dialog.dart';
 import 'widgets/cart_item_widget.dart';
 import 'widgets/product_card.dart';
 import 'widgets/upc_scan_dialog.dart';
@@ -21,9 +22,9 @@ class POSScreen extends ConsumerWidget {
   }) async {
     if (cart.isEmpty) return;
 
-    final paymentResult = await showDialog<CardPaymentResult>(
+    final paymentResult = await showDialog<CardReadResult>(
       context: context,
-      builder: (_) => CardPaymentDialog(amount: total),
+      builder: (_) => CardReaderPaymentDialog(amount: total),
     );
 
     if (!context.mounted || paymentResult == null) return;
@@ -32,7 +33,7 @@ class POSScreen extends ConsumerWidget {
 
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Paid with ${paymentResult.maskedCardNumber}')),
+      SnackBar(content: Text('Paid with ${paymentResult.maskedPan}')),
     );
 
     if (closeAfterSuccess && context.mounted) {
