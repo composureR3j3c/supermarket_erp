@@ -4,12 +4,41 @@ import 'package:supermarket_erp_demo/features/inventory/widgets/quantity_dialog.
 import '../inventory/product_provider.dart';
 import '../../shared/models/product.dart';
 import 'pos_provider.dart';
+import 'widgets/card_payment_dialog.dart';
 import 'widgets/cart_item_widget.dart';
 import 'widgets/product_card.dart';
 import 'widgets/upc_scan_dialog.dart';
 
 class POSScreen extends ConsumerWidget {
   const POSScreen({super.key});
+
+  Future<void> _startCardCheckout(
+    BuildContext context,
+    WidgetRef ref,
+    List<CartItem> cart,
+    double total, {
+    bool closeAfterSuccess = false,
+  }) async {
+    if (cart.isEmpty) return;
+
+    final paymentResult = await showDialog<CardPaymentResult>(
+      context: context,
+      builder: (_) => CardPaymentDialog(amount: total),
+    );
+
+    if (!context.mounted || paymentResult == null) return;
+
+    ref.read(posProvider.notifier).checkout();
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Paid with ${paymentResult.maskedCardNumber}')),
+    );
+
+    if (closeAfterSuccess && context.mounted) {
+      Navigator.pop(context);
+    }
+  }
 
   Future<void> _scanUpcAndAdd(
     BuildContext context,
@@ -107,7 +136,15 @@ class POSScreen extends ConsumerWidget {
               ),
 
               // CART (desktop only)
-              if (isWide) SizedBox(width: 360, child: _CartPanel(cart: cart)),
+              if (isWide)
+                SizedBox(
+                  width: 360,
+                  child: _CartPanel(
+                    cart: cart,
+                    onCheckout: (context, ref, cart, total) =>
+                        _startCardCheckout(context, ref, cart, total),
+                  ),
+                ),
             ],
           );
         },
@@ -117,7 +154,18 @@ class POSScreen extends ConsumerWidget {
       bottomNavigationBar: LayoutBuilder(
         builder: (_, constraints) {
           if (constraints.maxWidth >= 1000) return const SizedBox();
-          return _MobileCartBar(cart: cart);
+          return _MobileCartBar(
+            cart: cart,
+            onCheckout:
+                (context, ref, cart, total, {closeAfterSuccess = false}) =>
+                    _startCardCheckout(
+                      context,
+                      ref,
+                      cart,
+                      total,
+                      closeAfterSuccess: closeAfterSuccess,
+                    ),
+          );
         },
       ),
     );
@@ -126,7 +174,15 @@ class POSScreen extends ConsumerWidget {
 
 class _CartPanel extends ConsumerWidget {
   final List<CartItem> cart;
-  const _CartPanel({required this.cart});
+  final Future<void> Function(
+    BuildContext context,
+    WidgetRef ref,
+    List<CartItem> cart,
+    double total,
+  )
+  onCheckout;
+
+  const _CartPanel({required this.cart, required this.onCheckout});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -165,7 +221,7 @@ class _CartPanel extends ConsumerWidget {
                     onPressed: cart.isEmpty
                         ? null
                         : () {
-                            ref.read(posProvider.notifier).checkout();
+                            onCheckout(context, ref, cart, total);
                           },
                     child: const Text('Checkout'),
                   ),
@@ -181,7 +237,16 @@ class _CartPanel extends ConsumerWidget {
 
 class _MobileCartBar extends ConsumerWidget {
   final List<CartItem> cart;
-  const _MobileCartBar({required this.cart});
+  final Future<void> Function(
+    BuildContext context,
+    WidgetRef ref,
+    List<CartItem> cart,
+    double total, {
+    bool closeAfterSuccess,
+  })
+  onCheckout;
+
+  const _MobileCartBar({required this.cart, required this.onCheckout});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -201,7 +266,8 @@ class _MobileCartBar extends ConsumerWidget {
                     context: context,
                     isScrollControlled: true,
                     showDragHandle: true,
-                    builder: (_) => _MobileCartSheet(cart: cart),
+                    builder: (_) =>
+                        _MobileCartSheet(cart: cart, onCheckout: onCheckout),
                   );
                 },
                 icon: const Icon(Icons.shopping_cart_outlined),
@@ -216,7 +282,7 @@ class _MobileCartBar extends ConsumerWidget {
               onPressed: cart.isEmpty
                   ? null
                   : () {
-                      ref.read(posProvider.notifier).checkout();
+                      onCheckout(context, ref, cart, total);
                     },
               child: Text('Checkout  \$${total.toStringAsFixed(2)}'),
             ),
@@ -229,7 +295,16 @@ class _MobileCartBar extends ConsumerWidget {
 
 class _MobileCartSheet extends ConsumerWidget {
   final List<CartItem> cart;
-  const _MobileCartSheet({required this.cart});
+  final Future<void> Function(
+    BuildContext context,
+    WidgetRef ref,
+    List<CartItem> cart,
+    double total, {
+    bool closeAfterSuccess,
+  })
+  onCheckout;
+
+  const _MobileCartSheet({required this.cart, required this.onCheckout});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -280,8 +355,13 @@ class _MobileCartSheet extends ConsumerWidget {
                       onPressed: cart.isEmpty
                           ? null
                           : () {
-                              ref.read(posProvider.notifier).checkout();
-                              Navigator.pop(context);
+                              onCheckout(
+                                context,
+                                ref,
+                                cart,
+                                total,
+                                closeAfterSuccess: true,
+                              );
                             },
                       child: const Text('Checkout'),
                     ),
